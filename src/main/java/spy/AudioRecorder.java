@@ -1,15 +1,18 @@
 package spy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.sound.sampled.*;
 import java.io.*;
-import java.util.Calendar;
 
 public class AudioRecorder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AudioRecorder.class);
 
     /**
      * Audio file type
      */
-    private final AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
+    private static final AudioFileFormat.Type FILE_TYPE = AudioFileFormat.Type.WAVE;
 
     /**
      * Data line to read audio
@@ -19,7 +22,7 @@ public class AudioRecorder {
     /**
      * Root directory for saving audio files
      */
-    private final String uploadPath = "src/main/captures/audio/";
+    private final String UPLOAD_PATH = "src/main/captures/audio/";
 
     /**
      * Defines an audio format
@@ -28,6 +31,7 @@ public class AudioRecorder {
         float sampleRate = 16000;
         int sampleSizeInBits = 8;
         int channels = 2;
+
         return new AudioFormat(sampleRate, sampleSizeInBits, channels,
                 true, true);
     }
@@ -41,13 +45,13 @@ public class AudioRecorder {
             DataLine.Info info = new DataLine.Info(TargetDataLine.class, format);
 
             if (!AudioSystem.isLineSupported(info)) {
-                System.out.println("Line not supported");
+                LOGGER.error("Line not supported, existing"); // use proper log message
                 System.exit(0);
             }
 
             saveRecording(format, info);
         } catch (IOException | LineUnavailableException exception) {
-            exception.printStackTrace();
+            LOGGER.error("Unable to record audio", exception);
         }
     }
 
@@ -55,22 +59,21 @@ public class AudioRecorder {
      * Save audio into wav files
      *
      * @param format AudioFormat
-     * @param info DataLine Info
-     * @throws IOException I/O exception
+     * @param info   DataLine Info
+     * @throws IOException              I/O exception
      * @throws LineUnavailableException line unavailable exception
      */
     private void saveRecording(AudioFormat format, DataLine.Info info)
             throws IOException, LineUnavailableException {
 
-        Calendar now = Calendar.getInstance();
-        File wavFile = new File(uploadPath + now.getTime() + ".wav");
+        File wavFile = new File(UPLOAD_PATH + System.currentTimeMillis() + ".wav");
         line = (TargetDataLine) AudioSystem.getLine(info);
         AudioInputStream audioInputStream = new AudioInputStream(line);
 
         line.open(format);
         line.start();
 
-        AudioSystem.write(audioInputStream, fileType, wavFile);
+        AudioSystem.write(audioInputStream, FILE_TYPE, wavFile);
     }
 
     /**
@@ -92,7 +95,8 @@ public class AudioRecorder {
         try {
             Thread.sleep(sleepTime);
         } catch (InterruptedException ex) {
-            ex.printStackTrace();
+            Thread.currentThread().interrupt();
+            throw new AssertionError(ex);
         }
         finish();
     }

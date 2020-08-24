@@ -1,12 +1,13 @@
 package spy;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.sound.sampled.*;
 import java.io.*;
 
 public class AudioRecorder {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AudioRecorder.class);
 
     /**
@@ -50,6 +51,7 @@ public class AudioRecorder {
             }
 
             saveRecording(format, info);
+            LOGGER.info("Started new recording");
         } catch (IOException | LineUnavailableException exception) {
             LOGGER.error("Unable to record audio", exception);
         }

@@ -1,18 +1,16 @@
 package spy;
 
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Calendar;
 
 public class Screenshot {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Screenshot.class);
 
     /**

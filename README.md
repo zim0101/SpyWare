@@ -1,3 +1,3 @@
 # spy.SpyWare
 
-Captures multiple screenshots and record audio for some time being.
+Captures multiple screenshots and record audio with a schedule thread pool.

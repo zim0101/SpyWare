@@ -6,8 +6,20 @@ import java.util.Calendar;
 
 public class AudioRecorder {
 
+    /**
+     * Audio file type
+     */
     private final AudioFileFormat.Type fileType = AudioFileFormat.Type.WAVE;
+
+    /**
+     * Data line to read audio
+     */
     private TargetDataLine line;
+
+    /**
+     * Root directory for saving audio files
+     */
+    private final String uploadPath = "src/main/captures/audio/";
 
     /**
      * Defines an audio format
@@ -39,11 +51,19 @@ public class AudioRecorder {
         }
     }
 
+    /**
+     * Save audio into wav files
+     *
+     * @param format AudioFormat
+     * @param info DataLine Info
+     * @throws IOException I/O exception
+     * @throws LineUnavailableException line unavailable exception
+     */
     private void saveRecording(AudioFormat format, DataLine.Info info)
             throws IOException, LineUnavailableException {
+
         Calendar now = Calendar.getInstance();
-        File wavFile = new File(
-                "src/main/captures/audio/"+now.getTime() + ".wav");
+        File wavFile = new File(uploadPath + now.getTime() + ".wav");
         line = (TargetDataLine) AudioSystem.getLine(info);
         AudioInputStream audioInputStream = new AudioInputStream(line);
 
@@ -61,6 +81,13 @@ public class AudioRecorder {
         line.close();
     }
 
+    /**
+     * A thread will remain sleeping until sleepTime, then the thread will
+     * execute the method to finish recording
+     *
+     * @param sleepTime Duration of recording. After this time being
+     *                  recording will finish
+     */
     public void stopRecordingAudio(long sleepTime) {
         try {
             Thread.sleep(sleepTime);
